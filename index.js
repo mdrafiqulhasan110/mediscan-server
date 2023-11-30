@@ -4,6 +4,8 @@ const handleUser = require("./src/Routes/handleUser");
 const handleBanner = require("./src/Routes/handleBanner");
 const handleToken = require("./src/Routes/handleToken");
 const handleAdmin = require("./src/Routes/handleAdmin");
+const handleTest = require("./src/Routes/handleTest");
+const handleReservation = require("./src/Routes/handleReservation");
 
 var cors = require("cors");
 var app = express();
@@ -16,6 +18,8 @@ app.use(express.json());
 
 app.use("/user", handleUser);
 app.use("/banner", handleBanner);
+app.use("/reservation", handleReservation);
+app.use("/test", handleTest);
 app.use("/jwt", handleToken);
 app.use("/", handleAdmin);
 

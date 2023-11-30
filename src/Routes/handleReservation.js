@@ -1,35 +1,30 @@
 const express = require("express");
 const router = express.Router();
-const banner = require("../Models/bannerSchema");
+const reservation = require("../Models/reservationSchema");
 const verifyToken = require("../MiddleWare/verifyToken");
 const verifyAdmin = require("../MiddleWare/verifyAdmin");
 
 router.get("/", verifyToken, verifyAdmin, async (req, res) => {
   try {
-    let banners = await banner.find({});
-    return res.status(200).json(banners);
+    let reservations = await reservation.find({});
+    return res.status(200).json(reservations);
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);
   }
 });
-router.put("/active/:id", async (req, res) => {
+
+router.put("/changestatus/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
+  const status = req.body;
   try {
-    await banner.updateMany({
-      $set: {
-        isActive: false,
-      },
-    });
-    await banner.updateOne(
+    await reservation.updateOne(
       { _id: id },
       {
-        $set: {
-          isActive: true,
-        },
+        $set: status,
       }
     );
-    res.status(201).json({ message: "Banner Updated" });
+    res.status(201).json({ message: "reservation Updated" });
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);
@@ -39,7 +34,7 @@ router.put("/active/:id", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    let bann = await banner.findOne({ _id: id });
+    let bann = await reservation.findOne({ _id: id });
     return res.status(200).json(bann);
   } catch (err) {
     console.log(err);
@@ -47,9 +42,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/status/active", async (req, res) => {
+router.get("/status/featured", async (req, res) => {
   try {
-    let bann = await banner.findOne({ isActive: true });
+    let bann = await reservation.findOne({ isFeatured: true });
     return res.status(200).json(bann);
   } catch (err) {
     console.log(err);
@@ -58,10 +53,10 @@ router.get("/status/active", async (req, res) => {
 });
 
 router.post("/", verifyToken, verifyAdmin, async (req, res) => {
-  const newBanner = new banner(req.body);
+  const newReservation = new reservation(req.body);
   try {
-    await newBanner.save();
-    res.status(201).json({ message: "New Banner Created" });
+    await newReservation.save();
+    res.status(201).json({ message: "New Reservation Created" });
   } catch (err) {
     res.status(409).json({ message: err });
   }
@@ -69,21 +64,15 @@ router.post("/", verifyToken, verifyAdmin, async (req, res) => {
 
 router.put("/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
-  const newBanner = req.body;
+  const newReservation = req.body;
   try {
-    await banner.updateOne(
+    await reservation.updateOne(
       { _id: id },
       {
-        $set: {
-          title: newBanner.title,
-          description: newBanner.description,
-          image: newBanner.image,
-          couponCode: newBanner.couponCode,
-          couponRate: newBanner.couponRate,
-        },
+        $set: newReservation,
       }
     );
-    res.status(201).json({ message: "Banner Updated" });
+    res.status(201).json({ message: "Reservation Updated" });
   } catch (err) {
     res.status(409).json({ message: err });
   }
@@ -92,8 +81,8 @@ router.put("/:id", verifyToken, verifyAdmin, async (req, res) => {
 router.delete("/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    let banners = await banner.deleteOne({ _id: id });
-    return res.status(200).json(banners);
+    let reservations = await reservation.deleteOne({ _id: id });
+    return res.status(200).json(reservations);
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);

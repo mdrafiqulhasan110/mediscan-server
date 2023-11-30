@@ -7,7 +7,6 @@ const verifyAdmin = require("../MiddleWare/verifyAdmin");
 router.get("/", verifyToken, verifyAdmin, async (req, res) => {
   try {
     let users = await user.find({});
-    if (!users || !users[0]) throw new Error("No Users Found");
     return res.status(200).json(users);
   } catch (err) {
     console.log(err);

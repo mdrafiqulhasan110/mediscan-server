@@ -1,35 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const banner = require("../Models/bannerSchema");
+const test = require("../Models/testSchema");
 const verifyToken = require("../MiddleWare/verifyToken");
 const verifyAdmin = require("../MiddleWare/verifyAdmin");
 
-router.get("/", verifyToken, verifyAdmin, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    let banners = await banner.find({});
-    return res.status(200).json(banners);
+    let tests = await test.find({});
+    return res.status(200).json(tests);
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);
   }
 });
-router.put("/active/:id", async (req, res) => {
+
+router.put("/changestatus/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
+  const status = req.body;
   try {
-    await banner.updateMany({
-      $set: {
-        isActive: false,
-      },
-    });
-    await banner.updateOne(
+    await test.updateOne(
       { _id: id },
       {
-        $set: {
-          isActive: true,
-        },
+        $set: status,
       }
     );
-    res.status(201).json({ message: "Banner Updated" });
+    res.status(201).json({ message: "test Updated" });
+  } catch (err) {
+    console.log(err);
+    return res.status(401).send(err.message);
+  }
+});
+router.put("/slots/:id", verifyToken, async (req, res) => {
+  const id = req.params.id;
+  try {
+    await test.updateOne({ _id: id }, { $inc: { slots: -1 } });
+    res.status(201).json({ message: "test Updated" });
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);
@@ -39,7 +44,7 @@ router.put("/active/:id", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    let bann = await banner.findOne({ _id: id });
+    let bann = await test.findOne({ _id: id });
     return res.status(200).json(bann);
   } catch (err) {
     console.log(err);
@@ -47,9 +52,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/status/active", async (req, res) => {
+router.get("/status/featured", async (req, res) => {
   try {
-    let bann = await banner.findOne({ isActive: true });
+    let bann = await test.findOne({ isFeatured: true });
     return res.status(200).json(bann);
   } catch (err) {
     console.log(err);
@@ -58,10 +63,10 @@ router.get("/status/active", async (req, res) => {
 });
 
 router.post("/", verifyToken, verifyAdmin, async (req, res) => {
-  const newBanner = new banner(req.body);
+  const newTest = new test(req.body);
   try {
-    await newBanner.save();
-    res.status(201).json({ message: "New Banner Created" });
+    await newTest.save();
+    res.status(201).json({ message: "New Test Created" });
   } catch (err) {
     res.status(409).json({ message: err });
   }
@@ -69,21 +74,15 @@ router.post("/", verifyToken, verifyAdmin, async (req, res) => {
 
 router.put("/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
-  const newBanner = req.body;
+  const newTest = req.body;
   try {
-    await banner.updateOne(
+    await test.updateOne(
       { _id: id },
       {
-        $set: {
-          title: newBanner.title,
-          description: newBanner.description,
-          image: newBanner.image,
-          couponCode: newBanner.couponCode,
-          couponRate: newBanner.couponRate,
-        },
+        $set: newTest,
       }
     );
-    res.status(201).json({ message: "Banner Updated" });
+    res.status(201).json({ message: "Test Updated" });
   } catch (err) {
     res.status(409).json({ message: err });
   }
@@ -92,8 +91,8 @@ router.put("/:id", verifyToken, verifyAdmin, async (req, res) => {
 router.delete("/:id", verifyToken, verifyAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    let banners = await banner.deleteOne({ _id: id });
-    return res.status(200).json(banners);
+    let tests = await test.deleteOne({ _id: id });
+    return res.status(200).json(tests);
   } catch (err) {
     console.log(err);
     return res.status(401).send(err.message);
