@@ -21,7 +21,7 @@ const bannerSchema = mongoose.Schema({
   },
   "isActive": {
     "type": "boolean",
-    default: "true",
+    default: "false",
   },
 });
 
